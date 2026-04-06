@@ -7,8 +7,8 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: '메모앱 - 간편한 메모 관리',
-  description: '밝고 깔끔한 디자인의 메모 애플리케이션',
+  title: '할일 앱 - 오늘도 화이팅!',
+  description: '밝고 깔끔한 디자인의 할일 관리 애플리케이션',
   generator: 'v0.app',
   icons: {
     icon: [
