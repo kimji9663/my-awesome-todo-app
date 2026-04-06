@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { TodoSidebar } from "@/components/todo-sidebar";
-import { TodoList } from "@/components/todo-list";
+import { MobileHeader } from "@/components/mobile-header";
+import { MobileNavigation } from "@/components/mobile-navigation";
+import { MobileTodoList } from "@/components/mobile-todo-list";
 
 export interface Todo {
   id: string;
@@ -67,9 +68,29 @@ export default function TodoApp() {
     return { total: categoryTodos.length, completed };
   };
 
+  const totalStats = {
+    total: todos.length,
+    completed: todos.filter((t) => t.completed).length,
+  };
+
   return (
-    <div className="flex h-screen bg-background">
-      <TodoSidebar
+    <div className="flex min-h-screen flex-col bg-background">
+      <MobileHeader
+        category={selectedCategory}
+        stats={getCategoryStats(selectedCategory)}
+        totalStats={totalStats}
+      />
+      <main className="flex-1 overflow-y-auto pb-20">
+        <MobileTodoList
+          category={selectedCategory}
+          todos={getCategoryTodos(selectedCategory)}
+          onToggle={handleToggle}
+          onAdd={handleAdd}
+          onDelete={handleDelete}
+          onEdit={handleEdit}
+        />
+      </main>
+      <MobileNavigation
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
         stats={{
@@ -77,14 +98,6 @@ export default function TodoApp() {
           tomorrow: getCategoryStats("tomorrow"),
           week: getCategoryStats("week"),
         }}
-      />
-      <TodoList
-        category={selectedCategory}
-        todos={getCategoryTodos(selectedCategory)}
-        onToggle={handleToggle}
-        onAdd={handleAdd}
-        onDelete={handleDelete}
-        onEdit={handleEdit}
       />
     </div>
   );
