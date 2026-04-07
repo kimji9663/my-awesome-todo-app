@@ -6,15 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import type { Todo, Category } from "@/app/page";
+import type { Todo, Category } from "@/lib/todo-types";
 
 interface MobileTodoListProps {
   category: Category;
   todos: Todo[];
-  onToggle: (id: string) => void;
-  onAdd: (text: string) => void;
-  onDelete: (id: string) => void;
-  onEdit: (id: string, text: string) => void;
+  onToggle: (id: string) => void | Promise<void>;
+  onAdd: (text: string) => void | Promise<void>;
+  onDelete: (id: string) => void | Promise<void>;
+  onEdit: (id: string, text: string) => void | Promise<void>;
+  disabled?: boolean;
 }
 
 export function MobileTodoList({
@@ -23,6 +24,7 @@ export function MobileTodoList({
   onAdd,
   onDelete,
   onEdit,
+  disabled = false,
 }: MobileTodoListProps) {
   const [newTodo, setNewTodo] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -31,12 +33,11 @@ export function MobileTodoList({
   const incompleteTodos = todos.filter((t) => !t.completed);
   const completedTodos = todos.filter((t) => t.completed);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newTodo.trim()) {
-      onAdd(newTodo.trim());
-      setNewTodo("");
-    }
+    if (disabled || !newTodo.trim()) return;
+    await onAdd(newTodo.trim());
+    setNewTodo("");
   };
 
   const handleEditStart = (todo: Todo) => {
@@ -44,9 +45,9 @@ export function MobileTodoList({
     setEditText(todo.text);
   };
 
-  const handleEditSave = (id: string) => {
+  const handleEditSave = async (id: string) => {
     if (editText.trim()) {
-      onEdit(id, editText.trim());
+      await onEdit(id, editText.trim());
     }
     setEditingId(null);
     setEditText("");
@@ -62,14 +63,16 @@ export function MobileTodoList({
       <form onSubmit={handleSubmit} className="mb-5">
         <div className="flex gap-2">
           <Input
-            placeholder="새 할일 추가..."
+            placeholder={disabled ? "불러오는 중…" : "새 할일 추가..."}
             value={newTodo}
             onChange={(e) => setNewTodo(e.target.value)}
+            disabled={disabled}
             className="flex-1 h-12 rounded-xl bg-card border-border text-base"
           />
           <Button
             type="submit"
             size="icon"
+            disabled={disabled}
             className="h-12 w-12 shrink-0 rounded-xl"
           >
             <Plus className="h-5 w-5" />
@@ -91,7 +94,8 @@ export function MobileTodoList({
                 <Checkbox
                   id={todo.id}
                   checked={todo.completed}
-                  onCheckedChange={() => onToggle(todo.id)}
+                  disabled={disabled}
+                  onCheckedChange={() => void onToggle(todo.id)}
                   className="h-6 w-6 shrink-0 rounded-full border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                 />
                 {editingId === todo.id ? (
@@ -109,7 +113,8 @@ export function MobileTodoList({
                     <Button
                       size="icon"
                       variant="ghost"
-                      onClick={() => handleEditSave(todo.id)}
+                      disabled={disabled}
+                      onClick={() => void handleEditSave(todo.id)}
                       className="h-10 w-10 shrink-0 text-emerald-600"
                     >
                       <Check className="h-5 w-5" />
@@ -117,6 +122,7 @@ export function MobileTodoList({
                     <Button
                       size="icon"
                       variant="ghost"
+                      disabled={disabled}
                       onClick={handleEditCancel}
                       className="h-10 w-10 shrink-0 text-muted-foreground"
                     >
@@ -135,6 +141,7 @@ export function MobileTodoList({
                       <Button
                         size="icon"
                         variant="ghost"
+                        disabled={disabled}
                         onClick={() => handleEditStart(todo)}
                         className="h-9 w-9 shrink-0 text-muted-foreground"
                       >
@@ -143,7 +150,8 @@ export function MobileTodoList({
                       <Button
                         size="icon"
                         variant="ghost"
-                        onClick={() => onDelete(todo.id)}
+                        disabled={disabled}
+                        onClick={() => void onDelete(todo.id)}
                         className="h-9 w-9 shrink-0 text-destructive"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -171,7 +179,8 @@ export function MobileTodoList({
                 <Checkbox
                   id={todo.id}
                   checked={todo.completed}
-                  onCheckedChange={() => onToggle(todo.id)}
+                  disabled={disabled}
+                  onCheckedChange={() => void onToggle(todo.id)}
                   className="h-6 w-6 shrink-0 rounded-full border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                 />
                 <label
@@ -183,7 +192,8 @@ export function MobileTodoList({
                 <Button
                   size="icon"
                   variant="ghost"
-                  onClick={() => onDelete(todo.id)}
+                  disabled={disabled}
+                  onClick={() => void onDelete(todo.id)}
                   className="h-9 w-9 shrink-0 text-destructive/70"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -194,7 +204,13 @@ export function MobileTodoList({
         </div>
       )}
 
-      {todos.length === 0 && (
+      {todos.length === 0 && disabled && (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <p className="text-muted-foreground">할일을 불러오는 중…</p>
+        </div>
+      )}
+
+      {todos.length === 0 && !disabled && (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
             <Check className="h-8 w-8 text-muted-foreground" />

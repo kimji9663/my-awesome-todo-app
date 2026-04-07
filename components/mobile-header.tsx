@@ -1,13 +1,16 @@
 "use client";
 
-import { Sun, Sunrise, Calendar } from "lucide-react";
+import { LogOut, Sun, Sunrise, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Category } from "@/app/page";
+import { Button } from "@/components/ui/button";
+import type { Category } from "@/lib/todo-types";
 
 interface MobileHeaderProps {
   category: Category;
   stats: { total: number; completed: number };
   totalStats: { total: number; completed: number };
+  userEmail: string;
+  onLogout: () => void;
 }
 
 const categoryInfo: Record<
@@ -43,7 +46,13 @@ const categoryInfo: Record<
   },
 };
 
-export function MobileHeader({ category, stats, totalStats }: MobileHeaderProps) {
+export function MobileHeader({
+  category,
+  stats,
+  totalStats,
+  userEmail,
+  onLogout,
+}: MobileHeaderProps) {
   const info = categoryInfo[category];
   const Icon = info.icon;
   const progressPercent =
@@ -60,6 +69,22 @@ export function MobileHeader({ category, stats, totalStats }: MobileHeaderProps)
       <div className="absolute right-16 top-16 h-16 w-16 rounded-full bg-white/10" />
 
       <div className="relative">
+        <div className="mb-3 flex items-center justify-between gap-2 text-xs text-white/90">
+          <span className="truncate" title={userEmail}>
+            {userEmail}
+          </span>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            className="h-8 shrink-0 gap-1 border-0 bg-white/20 text-white hover:bg-white/30"
+            onClick={onLogout}
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            로그아웃
+          </Button>
+        </div>
+
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3">

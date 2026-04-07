@@ -2,7 +2,7 @@
 
 import { Sun, Sunrise, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Category } from "@/app/page";
+import type { Category } from "@/lib/todo-types";
 
 interface CategoryStats {
   total: number;
